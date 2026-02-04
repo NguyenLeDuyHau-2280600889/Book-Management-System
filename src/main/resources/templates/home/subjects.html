@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh sách môn học</title>
+</head>
+<body>
+  <nav>
+    <a href="/">Trang chủ</a> |
+    <a href="/subjects">Danh sách môn học</a> |
+    <a href="/contact">Liên hệ</a>
+  </nav>
+  <h1>Danh sách môn học</h1>
+
+  <div>
+    <div th:each="subject : ${subjects}">
+      <img th:src="${subject.imageUrl}" alt="Ảnh môn học" width="120" height="120">
+      <div>
+        <strong th:text="${subject.code}"></strong>
+        <span> - </span>
+        <span th:text="${subject.name}"></span>
+      </div>
+      <hr>
+    </div>
+  </div>
+</body>
+</html>
