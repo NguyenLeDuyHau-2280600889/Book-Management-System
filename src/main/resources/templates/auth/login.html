@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng nhập</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container">
+    <h1>Đăng nhập</h1>
+    <p class="subtitle">Chào mừng quay lại! Vui lòng đăng nhập.</p>
+
+    <div class="alert" th:if="${param.error}">Sai tài khoản hoặc mật khẩu.</div>
+    <div class="alert" th:if="${param.logout}">Bạn đã đăng xuất.</div>
+    <div id="social-error" class="alert" style="display:none;"></div>
+
+    <form method="post" th:action="@{/login}">
+        <label for="username">Tên đăng nhập hoặc Email</label>
+        <input id="username" name="username" type="text" required>
+
+        <label for="password">Mật khẩu</label>
+        <input id="password" name="password" type="password" required>
+
+        <label>
+            <input type="checkbox" name="remember-me">
+            Ghi nhớ đăng nhập
+        </label>
+
+        <button type="submit">Đăng nhập</button>
+    </form>
+
+    <div style="margin-top: 16px;">
+        <div id="google-login"></div>
+        <button id="facebook-login" class="btn btn-outline btn-small" type="button" style="margin-top: 8px;">
+            Dang nhap voi Facebook
+        </button>
+    </div>
+
+    <p>Bạn chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a></p>
+</main>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+const googleClientId = /*[[${googleClientId}]]*/ "";
+const facebookAppId = /*[[${facebookAppId}]]*/ "";
+/*]]>*/
+
+function showSocialError(message) {
+    const el = document.getElementById("social-error");
+    if (!el) {
+        return;
+    }
+    el.textContent = message || "Dang nhap that bai.";
+    el.style.display = "block";
+}
+
+function postSocial(provider, token) {
+    fetch("/auth/social/" + provider, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: token })
+    })
+        .then((response) => response.json().then((data) => ({ ok: response.ok, data: data })))
+        .then((result) => {
+            if (result.ok && result.data && result.data.ok) {
+                window.location.href = result.data.redirectUrl || "/";
+                return;
+            }
+            showSocialError((result.data && result.data.message) || "Dang nhap that bai.");
+        })
+        .catch(() => showSocialError("Dang nhap that bai."));
+}
+
+function initGoogleButton() {
+    const googleButton = document.getElementById("google-login");
+    if (!googleClientId) {
+        if (googleButton) {
+            googleButton.style.display = "none";
+        }
+        return;
+    }
+    if (!window.google || !window.google.accounts) {
+        setTimeout(initGoogleButton, 200);
+        return;
+    }
+    window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: (response) => postSocial("google", response.credential)
+    });
+    window.google.accounts.id.renderButton(googleButton, { theme: "outline", size: "large" });
+}
+window.addEventListener("load", initGoogleButton);
+
+window.fbAsyncInit = function() {
+    if (!facebookAppId) {
+        return;
+    }
+    window.FB.init({
+        appId: facebookAppId,
+        cookie: true,
+        xfbml: false,
+        version: "v18.0"
+    });
+};
+
+const facebookButton = document.getElementById("facebook-login");
+if (facebookButton) {
+    if (!facebookAppId) {
+        facebookButton.style.display = "none";
+    }
+    facebookButton.addEventListener("click", function() {
+        if (!window.FB) {
+            showSocialError("Facebook SDK chua san sang.");
+            return;
+        }
+        window.FB.login(function(response) {
+            if (response.authResponse && response.authResponse.accessToken) {
+                postSocial("facebook", response.authResponse.accessToken);
+            } else {
+                showSocialError("Khong the lay token Facebook.");
+            }
+        }, { scope: "email,public_profile" });
+    });
+}
+</script>
+</body>
+</html>

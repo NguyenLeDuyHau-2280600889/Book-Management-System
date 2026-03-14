@@ -1,46 +1,112 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My App</title>
-<link th:fragment="link-css" rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-<link th:fragment="custom-css" rel="stylesheet" th:href="@{/css/style.css}">
+<title>QUẢN LÝ SÁCH</title>
+<link th:fragment="app-css" rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="d-flex flex-column h-100">
+<body th:classappend="${#authorization.expression('hasRole(''ADMIN'')')} ? ' admin-body' : ''">
 <header th:fragment="header">
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-<div class="container-fluid">
-<a class="navbar-brand" href="/">HUTECH</a>
-<button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation">
-<span class="navbar-toggler-icon"></span>
-</button>
-<div class="collapse navbar-collapse" id="navbarSupportedContent">
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-<li class="nav-item">
-<a class="nav-link active" aria-current="page" href="/">Home</a>
-</li>
-<li class="nav-item"><a class="nav-link" href="/books">List Book</a></li>
-<li class="nav-item"><a class="nav-link" href="/books/add">Add Book</a></li>
-</ul>
+<nav class="site-header" sec:authorize="!hasRole('ADMIN')">
+<div class="nav">
+<a class="nav-brand" href="/">QUẢN LÝ SÁCH</a>
+<div class="nav-links">
+<a class="nav-link" href="/">Trang chủ</a>
+<a class="nav-link" href="/books">Danh sách sách</a>
+<a class="nav-link" href="/books/add" sec:authorize="hasRole('ADMIN')">Thêm sách</a>
+<a class="nav-link" href="/users" sec:authorize="hasRole('ADMIN')">Quản lý user</a>
+<a class="nav-link" href="/categories" sec:authorize="hasRole('ADMIN')">Quản lý danh mục</a>
+<a class="nav-link" href="/cart" sec:authorize="!hasRole('ADMIN')">Giỏ hàng</a>
+<a class="nav-link" href="/orders" sec:authorize="isAuthenticated()">Lịch sử mua hàng</a>
+<a class="nav-link" href="/chat" sec:authorize="isAuthenticated()">Chat hỗ trợ</a>
+</div>
+<div class="nav-actions" sec:authorize="!isAuthenticated()">
+<a class="btn btn-outline btn-small" href="/login">Đăng nhập</a>
+<a class="btn btn-primary btn-small" href="/register">Đăng ký</a>
+</div>
+<div class="nav-actions" sec:authorize="isAuthenticated()">
+<span class="nav-user" sec:authentication="principal.username"></span>
+<form th:action="@{/logout}" method="post" style="display: inline;">
+<button class="btn btn-outline btn-small" type="submit">Đăng xuất</button>
+</form>
 </div>
 </div>
 </nav>
+<nav class="admin-sidebar" sec:authorize="hasRole('ADMIN')">
+<button class="admin-toggle" type="button" aria-label="Thu gon menu" onclick="document.body.classList.toggle('admin-collapsed')">
+<span class="admin-toggle-icon"></span>
+</button>
+<div class="admin-brand">QUẢN LÝ SÁCH</div>
+<div class="admin-user">
+<span sec:authentication="principal.username"></span>
+</div>
+<div class="admin-links">
+<a class="admin-link" href="/books" data-route="/books">
+<span class="admin-link-icon">BK</span><span class="admin-link-label">Danh sách sách</span>
+</a>
+<a class="admin-link" href="/books/add" data-route="/books/add">
+<span class="admin-link-icon">AD</span><span class="admin-link-label">Thêm sách</span>
+</a>
+<a class="admin-link" href="/categories" data-route="/categories">
+<span class="admin-link-icon">DM</span><span class="admin-link-label">Quản lý danh mục</span>
+</a>
+<a class="admin-link" href="/users" data-route="/users">
+<span class="admin-link-icon">US</span><span class="admin-link-label">Quản lý user</span>
+</a>
+<a class="admin-link" href="/orders" data-route="/orders">
+<span class="admin-link-icon">OD</span><span class="admin-link-label">Lịch sử mua hàng</span>
+</a>
+<a class="admin-link" href="/admin/payment-qr" data-route="/admin/payment-qr">
+<span class="admin-link-icon">QR</span><span class="admin-link-label">Cấu hình QR</span>
+</a>
+<a class="admin-link" href="/chat" data-route="/chat">
+<span class="admin-link-icon">CS</span><span class="admin-link-label">Chat hỗ trợ</span>
+</a>
+</div>
+<form th:action="@{/logout}" method="post" class="admin-logout">
+<button class="btn btn-outline btn-small" type="submit">Đăng xuất</button>
+</form>
+</nav>
 </header>
-<div class="container">
+<div class="page">
 <div th:fragment="content"></div>
 </div>
-<footer th:fragment="footer" class="footer mt-auto py-3 bg-light">
-<div class="container text-center">Copyright &copy;
+<footer th:fragment="footer" class="footer">
+<div>Copyright &copy;
 <span th:text="${#dates.year(#dates.createNow())}"></span>
-<a href="https://www.hutech.edu.vn/">HUTECH Education</a>
+<a href="/">QUẢN LÝ SÁCH</a>
 </div>
-<script th:src="@{/js/bootstrap.min.js}"></script>
-<script th:src="@{/js/jquery-3.7.0.min.js}"></script>
 </footer>
+<script>
+(function() {
+    const button = document.querySelector(".admin-toggle");
+    if (!button) {
+        return;
+    }
+    button.addEventListener("click", function() {
+        const collapsed = document.body.classList.toggle("admin-collapsed");
+        button.setAttribute("aria-label", collapsed ? "Mo menu" : "Thu gon menu");
+    });
+})();
+
+(function() {
+    const links = document.querySelectorAll(".admin-link[data-route]");
+    if (!links.length) {
+        return;
+    }
+    const path = window.location.pathname;
+    links.forEach((link) => {
+        const route = link.getAttribute("data-route") || "";
+        if (!route) {
+            return;
+        }
+        if (path === route || (route !== "/" && path.startsWith(route + "/"))) {
+            link.classList.add("is-active");
+        }
+    });
+})();
+</script>
 </body>
 </html>

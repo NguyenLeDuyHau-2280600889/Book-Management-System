@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thêm đơn hàng</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel">
+<h1>Thêm đơn hàng</h1>
+<p class="subtitle">Tạo nhanh một đơn hàng mới.</p>
+<form th:action="@{/orders/add}" th:object="${form}" method="post">
+<div class="form-grid">
+<div>
+<label for="userId">Khách hàng</label>
+<select id="userId" th:field="*{userId}">
+<option value="">-- Chọn khách hàng --</option>
+<option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username + ' - ' + user.email}"></option>
+</select>
+</div>
+<div>
+<label for="bookId">Sách</label>
+<select id="bookId" th:field="*{bookId}">
+<option value="">-- Chọn sách --</option>
+<option th:each="book : ${books}" th:value="${book.id}" th:text="${book.title + ' - ' + book.author}"></option>
+</select>
+</div>
+<div>
+<label for="quantity">Số lượng</label>
+<input id="quantity" type="number" min="1" th:field="*{quantity}">
+</div>
+</div>
+<button type="submit">Tạo đơn</button>
+</form>
+<br>
+<a class="btn btn-outline btn-small" th:href="@{/orders}">Quay lại lịch sử</a>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+</body>
+</html>

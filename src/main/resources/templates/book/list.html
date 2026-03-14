@@ -1,40 +1,80 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Book List</title>
-<th:block th:replace="~{layout::link-css}"></th:block>
-<th:block th:replace="~{layout::custom-css}"></th:block>
+<th:block th:replace="~{layout::app-css}"></th:block>
 </head>
 <body>
 <th:block th:replace="~{layout::header}"></th:block>
-<div class="container">
-<table class="table">
-<tr>
-<th>ID</th>
-<th>Title</th>
-<th>Author</th>
-<th>Price</th>
-<th>Category</th>
-<th>Action</th>
-</tr>
-<tr th:each="book : ${books}">
-<td th:text="${book.getId()}"></td>
-<td th:text="${book.getTitle()}"></td>
-<td th:text="${book.getAuthor()}"></td>
-<td th:text="${book.getPrice()}"></td>
-<td th:text="${book.getCategory()}"></td>
-<td colspan="2">
-<a class="btn btn-primary"
-   th:href="@{/books/edit/{id}(id=${book.getId()})}">Edit</a>
-<a class="btn btn-danger"
-   th:href="@{/books/delete/{id}(id=${book.getId()})}"
-   onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>
-</td>
-</tr>
-</table>
+<div class="page">
+<div class="panel books-shell">
+<div class="books-hero">
+    <div>
+        <h1>Danh sách sách</h1>
+        <p class="subtitle">Khám phá kho sách nổi bật và thêm nhanh vào giỏ hàng.</p>
+    </div>
+    <div class="books-hero-stat">
+        <span>Tổng sách hiển thị</span>
+        <strong th:text="${#lists.size(books)}"></strong>
+    </div>
+</div>
+
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<div class="books-toolbar">
+    <form method="get" th:action="@{/books/search}" class="books-search-form">
+        <label for="keyword">Tìm kiếm sách</label>
+        <div class="books-search-row">
+            <input id="keyword" name="keyword" type="text" placeholder="Nhập tên sách, tác giả, thể loại..." th:value="${keyword}">
+            <button type="submit">Tìm kiếm</button>
+            <a class="btn btn-outline btn-small" href="/books">Làm mới</a>
+        </div>
+    </form>
+</div>
+
+<div class="book-grid">
+    <div class="book-card" th:each="book : ${books}">
+        <div class="book-cover">
+            <img th:if="${book.imageUrl}" th:src="${book.imageUrl}" alt="book image">
+            <div class="book-cover-placeholder" th:if="${book.imageUrl == null or #strings.isEmpty(book.imageUrl)}">
+                Không có ảnh
+            </div>
+            <span class="book-category-badge" th:text="${book.getCategory()}"></span>
+        </div>
+        <div class="book-info">
+            <div class="book-title" th:text="${book.getTitle()}"></div>
+            <div class="book-meta">
+                <span>Tác giả: <strong th:text="${book.getAuthor()}"></strong></span>
+            </div>
+            <div class="book-price" th:text="${#numbers.formatDecimal(book.getPrice(), 1, 'COMMA', 0, 'POINT') + ' đ'}"></div>
+        </div>
+        <div class="book-actions">
+            <form th:action="@{/cart/add/{id}(id=${book.getId()})}" method="post" sec:authorize="!hasRole('ADMIN')">
+                <button class="btn btn-primary btn-small" type="submit">Thêm vào giỏ</button>
+            </form>
+            <a class="btn btn-primary btn-small"
+               th:href="@{/books/edit/{id}(id=${book.getId()})}" sec:authorize="hasRole('ADMIN')">Sửa</a>
+            <a class="btn btn-danger btn-small"
+               th:href="@{/books/delete/{id}(id=${book.getId()})}"
+               onclick="return confirm('Bạn có chắc muốn xóa sách này?')" sec:authorize="hasRole('ADMIN')">Xóa</a>
+        </div>
+    </div>
+</div>
+<div class="pagination books-pagination" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/books(pageNo=${currentPage - 1}, sortBy=${sortBy})}">Trước</a>
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+        <a th:href="@{/books(pageNo=${i}, sortBy=${sortBy})}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? ' active' : ''"></a>
+    </span>
+    <a th:if="${currentPage + 1 < totalPages}"
+       th:href="@{/books(pageNo=${currentPage + 1}, sortBy=${sortBy})}">Sau</a>
+</div>
+</div>
 </div>
 <th:block th:replace="~{layout::footer}"></th:block>
 </body>

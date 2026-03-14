@@ -4,36 +4,50 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<th:block th:replace="~{layout::link-css}"></th:block>
-<th:block th:replace="~{layout::custom-css}"></th:block>
+<th:block th:replace="~{layout::app-css}"></th:block>
 <title>Edit Book</title>
 </head>
 <body>
 <th:block th:replace="~{layout::header}"></th:block>
-<div class="container">
-<h1>Edit Book</h1>
+<div class="page">
+<div class="panel">
+<h1>Chỉnh sửa sách</h1>
+<p class="subtitle">Cập nhật thông tin sách hiện có.</p>
 <form th:action="@{/books/edit}" th:object="${book}" method="post">
 <input type="hidden" th:field="*{id}">
-<div class="col-6 mb-3">
-<label class="form-label" for="title">Title:</label>
-<input class="form-control" type="text" th:field="*{title}" id="title">
+<div class="form-grid">
+<div>
+<label for="title">Tiêu đề</label>
+<input type="text" th:field="*{title}" id="title">
+<p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
 </div>
-<div class="col-6 mb-3">
-<label class="form-label" for="author">Author:</label>
-<input class="form-control" type="text" th:field="*{author}" id="author">
+<div>
+<label for="author">Tác giả</label>
+<input type="text" th:field="*{author}" id="author">
+<p class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></p>
 </div>
-<div class="col-6 mb-3">
-<label class="form-label" for="price">Price:</label>
-<input class="form-control" type="text" th:field="*{price}" id="price">
+<div>
+<label for="price">Giá</label>
+<input type="text" th:field="*{price}" id="price" placeholder="Ví dụ: 450000 hoặc 450,000">
+<p class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
 </div>
-<div class="col-6 mb-3">
-<label class="form-label" for="category">Category:</label>
-<input class="form-control" type="text" th:field="*{category}" id="category">
+<div>
+<label for="category">Danh mục</label>
+<input type="text" th:field="*{category}" id="category" list="categoryOptions">
+<datalist id="categoryOptions">
+<option th:each="category : ${categories}" th:value="${category.name}"></option>
+</datalist>
 </div>
-<input type="submit" value="Save">
+<div>
+<label for="imageUrl">Link hình ảnh</label>
+<input type="url" th:field="*{imageUrl}" id="imageUrl" placeholder="https://...">
+</div>
+</div>
+<button type="submit">Lưu thay đổi</button>
 </form>
 <br>
-<a th:href="@{/books}">Back to List</a>
+<a class="btn btn-outline btn-small" th:href="@{/books}">Quay lại danh sách</a>
+</div>
 </div>
 <th:block th:replace="~{layout::footer}"></th:block>
 </body>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat ho tro</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel">
+<h1>Chat ho tro</h1>
+<p class="subtitle">Trao doi voi quan ly ve don hang va san pham.</p>
+
+<div class="chat-box">
+<div class="chat-room-head">
+<div class="chat-room-title">Ho tro truc tuyen</div>
+<div class="chat-room-subtitle">Phan hoi tu quan ly se hien o day.</div>
+</div>
+<div id="chat-messages" class="chat-messages">
+<div th:each="message : ${messages}" class="chat-message"
+     th:classappend="${message.sender.id == customer.id} ? ' me' : ''">
+    <div class="chat-meta">
+        <span th:text="${message.sender.username}"></span>
+        <span> - </span>
+        <span th:text="${#temporals.format(message.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+    </div>
+    <div th:text="${message.content}"></div>
+</div>
+</div>
+<form class="chat-input" th:action="@{/chat/send}" method="post">
+    <input name="content" type="text" placeholder="Nhap tin nhan..." required>
+    <button type="submit">Gui</button>
+</form>
+</div>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+<script>
+(function() {
+    const box = document.getElementById("chat-messages");
+    const input = document.querySelector(".chat-input input[name='content']");
+
+    function formatDate(iso) {
+        if (!iso) {
+            return "";
+        }
+        return new Date(iso).toLocaleString("vi-VN", {
+            hour12: false
+        });
+    }
+
+    function render(messages) {
+        if (!box) {
+            return;
+        }
+        const shouldStickToBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+        box.innerHTML = "";
+        messages.forEach((message) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "chat-message" + (message.fromMe ? " me" : "");
+            const meta = document.createElement("div");
+            meta.className = "chat-meta";
+            meta.textContent = message.senderName + " - " + formatDate(message.createdAt);
+            const content = document.createElement("div");
+            content.textContent = message.content;
+            wrapper.appendChild(meta);
+            wrapper.appendChild(content);
+            box.appendChild(wrapper);
+        });
+        if (shouldStickToBottom) {
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+
+    function poll() {
+        fetch("/chat/messages")
+            .then((response) => response.json())
+            .then((data) => render(data))
+            .catch(() => {});
+    }
+
+    poll();
+    setInterval(poll, 5000);
+
+    if (input) {
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                const form = input.closest("form");
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+})();
+</script>
+</body>
+</html>

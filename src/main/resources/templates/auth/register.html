@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<main class="container">
+    <h1>Đăng ký</h1>
+    <p class="subtitle">Tạo tài khoản mới để bắt đầu sử dụng hệ thống.</p>
+
+    <div class="alert" th:if="${error}" th:text="${error}"></div>
+
+    <form method="post" th:action="@{/register}" th:object="${form}">
+        <label for="username">Tên đăng nhập</label>
+        <input id="username" type="text" th:field="*{username}" required>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" th:field="*{email}" required>
+
+        <label for="password">Mật khẩu</label>
+        <input id="password" type="password" th:field="*{password}" required>
+
+        <label for="confirmPassword">Xác nhận mật khẩu</label>
+        <input id="confirmPassword" type="password" th:field="*{confirmPassword}" required>
+
+        <label for="role">Loại tài khoản</label>
+        <select id="role" th:field="*{role}">
+            <option value="CUSTOMER">Khách hàng</option>
+            <option value="ADMIN">Quản lý</option>
+        </select>
+
+        <label for="adminCode">Mã quản lý (chỉ dành cho quản lý)</label>
+        <input id="adminCode" type="password" th:field="*{adminCode}">
+
+        <button type="submit">Tạo tài khoản</button>
+    </form>
+</main>
+</body>
+</html>

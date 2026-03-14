@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Giỏ hàng</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel cart-shell">
+<div class="cart-head">
+<div>
+<h1>Giỏ hàng của bạn</h1>
+<p class="subtitle">Kiểm tra lại sản phẩm trước khi thanh toán.</p>
+</div>
+<span class="badge" th:text="${#lists.size(items) + ' sản phẩm'}"></span>
+</div>
+
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<div class="cart-user-card" th:if="${currentUser != null}">
+<strong>Người đặt hàng:</strong>
+<span th:text="${currentUser.username}"></span>
+<span> - </span>
+<span th:text="${currentUser.email}"></span>
+</div>
+
+<div th:if="${#lists.isEmpty(items)}">
+<p>Giỏ hàng đang trống.</p>
+</div>
+
+<div class="cart-table-wrap" th:if="${!#lists.isEmpty(items)}">
+<table class="table">
+<thead>
+<tr>
+<th>Tên sách</th>
+<th>Tác giả</th>
+<th>Đơn giá</th>
+<th>Hình ảnh</th>
+<th>Số lượng</th>
+<th>Thành tiền</th>
+<th>Thao tác</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="item : ${items}">
+<td class="cart-item-title" th:text="${item.book.title}"></td>
+<td th:text="${item.book.author}"></td>
+<td th:text="${#numbers.formatDecimal(item.book.price, 1, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+<td>
+<img class="cart-thumb" th:if="${item.book.imageUrl}" th:src="${item.book.imageUrl}" alt="book image">
+<span th:if="${item.book.imageUrl == null or #strings.isEmpty(item.book.imageUrl)}">-</span>
+</td>
+<td th:text="${item.quantity}"></td>
+<td th:text="${#numbers.formatDecimal(item.lineTotal, 1, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+<td>
+<form th:action="@{/cart/remove/{id}(id=${item.book.id})}" method="post">
+<button class="btn btn-danger btn-small" type="submit">Xóa</button>
+</form>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="cart-summary-card" th:if="${!#lists.isEmpty(items)}">
+<strong>Tổng cộng:</strong> <span th:text="${total}"></span>
+<div class="cart-actions">
+<a class="btn btn-outline" href="/books">Tiếp tục chọn sách</a>
+<a class="btn btn-primary" href="/cart/checkout">Thanh toán ngay</a>
+</div>
+</div>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+</body>
+</html>

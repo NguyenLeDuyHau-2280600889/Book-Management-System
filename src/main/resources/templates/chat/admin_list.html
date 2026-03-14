@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hop thoai khach hang</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel">
+<h1>Hop thoai khach hang</h1>
+<p class="subtitle">Quan ly hoi thoai theo muc do moi nhat.</p>
+
+<div th:if="${#lists.isEmpty(conversations)}">
+<p>Chua co khach hang nao.</p>
+</div>
+
+<div class="conversation-grid" th:if="${!#lists.isEmpty(conversations)}">
+<div class="conversation-card" th:each="c : ${conversations}">
+<div class="conversation-header">
+<div>
+<div class="conversation-name" th:text="${c.customer.username}"></div>
+<div class="conversation-email" th:text="${c.customer.email}"></div>
+</div>
+<span class="conversation-count-badge">
+<span class="count-plus">+</span>
+<span th:text="${c.totalMessages + ' tin'}"></span>
+</span>
+</div>
+<p class="conversation-last" th:if="${c.lastMessage != null and !#strings.isEmpty(c.lastMessage)}" th:text="${c.lastMessage}"></p>
+<p class="conversation-last" th:if="${c.lastMessage == null or #strings.isEmpty(c.lastMessage)}">Chua co tin nhan.</p>
+<div class="conversation-footer">
+<span class="subtitle" th:if="${c.lastMessageAt != null}" th:text="${#temporals.format(c.lastMessageAt, 'dd/MM/yyyy HH:mm')}"></span>
+<a class="btn btn-outline btn-small" th:href="@{/chat/{id}(id=${c.customer.id})}">Mo chat</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+</body>
+</html>

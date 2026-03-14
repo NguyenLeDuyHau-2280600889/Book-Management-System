@@ -5,18 +5,21 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kết quả</title>
+  <th:block th:replace="~{layout::app-css}"></th:block>
 </head>
 <body>
-  <nav>
-    <a href="/">Trang chủ</a> |
-    <a href="/subjects">Danh sách môn học</a> |
-    <a href="/contact">Liên hệ</a>
-  </nav>
-  <h1>Kết quả</h1>
+  <th:block th:replace="~{layout::header}"></th:block>
+  <div class="page">
+    <div class="panel">
+      <h1>Kết quả</h1>
+      <p class="subtitle">Thông tin bạn đã gửi.</p>
 
-  <p><strong>Họ Tên:</strong> <span th:text="${fullName}"></span></p>
-  <p><strong>Email:</strong> <span th:text="${email}"></span></p>
-  <p><strong>Tin nhắn:</strong> <span th:text="${message}"></span></p>
-  <p><strong>Ngày Gửi:</strong> <span th:text="${sentDate}"></span></p>
+      <p><strong>Họ Tên:</strong> <span th:text="${fullName}"></span></p>
+      <p><strong>Email:</strong> <span th:text="${email}"></span></p>
+      <p><strong>Tin nhắn:</strong> <span th:text="${message}"></span></p>
+      <p><strong>Ngày Gửi:</strong> <span th:text="${sentDate}"></span></p>
+    </div>
+  </div>
+  <th:block th:replace="~{layout::footer}"></th:block>
 </body>
 </html>

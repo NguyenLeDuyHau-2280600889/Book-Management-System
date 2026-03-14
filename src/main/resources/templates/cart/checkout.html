@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh toán</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel checkout-panel">
+<h1>Thanh toán</h1>
+<p class="subtitle">Xác nhận thông tin và hoàn tất đơn hàng của bạn.</p>
+
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<div class="checkout-card">
+<div class="checkout-card-head">
+<h3>Đơn hàng</h3>
+<span class="badge" th:text="${#lists.size(items) + ' sản phẩm'}"></span>
+</div>
+<table class="table checkout-table" th:if="${!#lists.isEmpty(items)}">
+<thead>
+<tr>
+<th>Tên sách</th>
+<th>Số lượng</th>
+<th>Thành tiền</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="item : ${items}">
+<td th:text="${item.book.title}"></td>
+<td th:text="${item.quantity}"></td>
+<td th:text="${item.lineTotal}"></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<form id="checkoutForm" th:action="@{/cart/checkout}" method="post" enctype="multipart/form-data">
+<div class="checkout-layout">
+<div class="checkout-main">
+<div class="checkout-card">
+<label for="shippingAddress">Địa chỉ giao hàng chi tiết</label>
+<textarea id="shippingAddress" name="shippingAddress" rows="4" required
+          placeholder="Ví dụ: Số 25 Nguyễn Trãi, P. Bến Thành, Q.1, TP.HCM (gần Chợ Bến Thành), 0909xxxxxx"></textarea>
+<div class="address-helper">
+<p class="subtitle">Mẫu nên nhập: Số nhà + đường, phường/xã, quận/huyện, tỉnh/thành, ghi chú nhận hàng, số điện thoại.</p>
+<div class="address-tags">
+<button class="address-tag" type="button" data-insert="P. ">+ Phường/Xã</button>
+<button class="address-tag" type="button" data-insert="Q. ">+ Quận/Huyện</button>
+<button class="address-tag" type="button" data-insert="TP. ">+ Tỉnh/Thành</button>
+<button class="address-tag" type="button" data-insert="(Gần )">+ Mốc gần đó</button>
+<button class="address-tag" type="button" data-insert="09">+ SĐT nhận hàng</button>
+</div>
+</div>
+</div>
+<div class="checkout-card payment-qr" th:if="${paymentQrImage != null and !#strings.isEmpty(paymentQrImage)}">
+<h3>Quét mã QR</h3>
+<img th:src="${paymentQrImage}" alt="Mã QR thanh toán">
+<p class="subtitle" th:if="${paymentQrNote != null and !#strings.isEmpty(paymentQrNote)}" th:text="${paymentQrNote}"></p>
+</div>
+<div class="checkout-card">
+<label for="paymentReceipt">Ảnh biên lai thanh toán</label>
+<input id="paymentReceipt" type="file" name="paymentReceipt" accept="image/*" required>
+<p id="paymentReceiptHint" class="subtitle">Chỉ chấp nhận ảnh: JPG, JPEG, PNG, WEBP.</p>
+</div>
+</div>
+
+<aside class="checkout-side">
+<div class="checkout-summary-card">
+<h3>Tóm tắt thanh toán</h3>
+<div class="checkout-summary-row">
+<span>Tạm tính</span>
+<strong th:text="${subtotal}"></strong>
+</div>
+<div class="checkout-summary-row" th:if="${isNewCustomerDiscount}">
+<span>Ưu đãi khách mới (<span th:text="${discountPercent}"></span>%)</span>
+<strong>-<span th:text="${discountAmount}"></span></strong>
+</div>
+<p th:if="${isNewCustomerDiscount}" class="subtitle">Khuyến mãi áp dụng cho đơn đầu tiên.</p>
+<div class="checkout-summary-total">
+<span>Tổng cộng</span>
+<strong th:text="${total}"></strong>
+</div>
+<button id="checkoutSubmitBtn" type="submit" disabled>Xác nhận thanh toán</button>
+<p class="subtitle">Đơn hàng sẽ được quản lý xác nhận sau khi kiểm tra biên lai.</p>
+</div>
+</aside>
+</div>
+</form>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+<script>
+(function() {
+    const fileInput = document.getElementById("paymentReceipt");
+    const submitButton = document.getElementById("checkoutSubmitBtn");
+    const addressInput = document.getElementById("shippingAddress");
+    const addressTags = document.querySelectorAll(".address-tag");
+    const hint = document.getElementById("paymentReceiptHint");
+    if (!fileInput || !submitButton || !hint) {
+        return;
+    }
+    function updateButtonState() {
+        submitButton.disabled = !(fileInput.files && fileInput.files.length > 0);
+        if (fileInput.files && fileInput.files.length > 0) {
+            hint.textContent = "Đã chọn: " + fileInput.files[0].name;
+        } else {
+            hint.textContent = "Chỉ chấp nhận ảnh: JPG, JPEG, PNG, WEBP.";
+        }
+    }
+    fileInput.addEventListener("change", updateButtonState);
+    updateButtonState();
+
+    if (addressInput && addressTags.length > 0) {
+        addressTags.forEach((tag) => {
+            tag.addEventListener("click", () => {
+                const text = tag.getAttribute("data-insert") || "";
+                if (!text) {
+                    return;
+                }
+                const current = addressInput.value.trim();
+                if (current.length === 0) {
+                    addressInput.value = text;
+                } else if (!current.includes(text)) {
+                    addressInput.value = current + ", " + text;
+                }
+                addressInput.focus();
+                addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);
+            });
+        });
+    }
+})();
+</script>
+</body>
+</html>

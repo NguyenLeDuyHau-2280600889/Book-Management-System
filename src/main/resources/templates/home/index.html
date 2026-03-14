@@ -5,19 +5,68 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ỨNG DỤNG QUẢN LÝ SÁCH</title>
-<th:block th:replace="~{layout::link-css}"></th:block>
-<th:block th:replace="~{layout::custom-css}"></th:block>
+<th:block th:replace="~{layout::app-css}"></th:block>
 </head>
 <body>
 <th:block th:replace="~{layout::header}"></th:block>
-<div class="container">
-<nav class="navbar navbar-light bg-light">
-<div class="container-fluid">
-<a class="navbar-brand" href="#">
-TRANG CHỦ ỨNG DỤNG QUẢN LÝ SÁCH
-</a>
+<div class="page">
+<section class="hero">
+<div>
+<span class="badge">Nền tảng quản lý sách thông minh</span>
+<h1>Ứng dụng quản lý sách QUẢN LÝ SÁCH</h1>
+<p>Giải pháp hiện đại giúp bạn quản lý kho sách, theo dõi giá, phân loại danh mục và hỗ trợ mua sắm nhanh chóng.</p>
+<div class="hero-actions">
+<a class="btn btn-primary" href="/books">Khám phá danh sách sách</a>
+<a class="btn btn-outline" href="/register">Đăng ký ngay</a>
 </div>
-</nav>
+</div>
+<div class="hero-card">
+<h3>Ưu đãi hôm nay</h3>
+<p>Giảm 15% cho đơn hàng đầu tiên khi thanh toán online.</p>
+<a class="btn btn-primary btn-small" href="/cart">Mua ngay</a>
+</div>
+</section>
+
+<section class="feature-grid">
+<div class="feature">
+<h3>Quản lý tập trung</h3>
+<p>Danh mục, giá bán, tác giả được tổng hợp rõ ràng chỉ trong một bảng.</p>
+</div>
+<div class="feature">
+<h3>Tìm kiếm nhanh</h3>
+<p>Bộ lọc thông minh giúp bạn tìm đúng sách trong vài giây.</p>
+</div>
+<div class="feature">
+<h3>Giỏ hàng tiện lợi</h3>
+<p>Thêm sách, kiểm tra tổng tiền và thanh toán chỉ với vài thao tác.</p>
+</div>
+</section>
+
+<section class="promo-banner">
+<div>
+<h2>Quảng cáo: Combo “Tri thức”</h2>
+<p>Mua 2 tặng 1 cho dòng sách công nghệ. Áp dụng đến hết tuần này.</p>
+</div>
+<a class="btn btn-outline" href="/books">Xem ưu đãi</a>
+</section>
+
+<section class="about">
+<div>
+<h2>Giới thiệu</h2>
+<p>Ứng dụng quản lý sách QUẢN LÝ SÁCH giúp sinh viên và nhà quản trị dễ dàng cập nhật, kiểm soát và mua sắm sách. Giao diện trực quan, tốc độ nhanh, hỗ trợ đa thiết bị.</p>
+<ul>
+<li>Theo dõi sách theo tác giả, danh mục</li>
+<li>Phân quyền quản lý và khách hàng</li>
+<li>Tối ưu quy trình bán và thanh toán</li>
+</ul>
+</div>
+<div class="about-card">
+<h3>Liên hệ tư vấn</h3>
+<p>Hotline: 0347401411</p>
+<p>Email: haudeptrai2108@gmail.com</p>
+<a class="btn btn-primary btn-small" href="/contact">Gửi yêu cầu</a>
+</div>
+</section>
 </div>
 <th:block th:replace="~{layout::footer}"></th:block>
 </body>

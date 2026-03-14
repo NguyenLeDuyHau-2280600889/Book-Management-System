@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat voi khach hang</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel">
+<h1>Chat voi khach hang</h1>
+<p class="subtitle">Dang ho tro: <strong th:text="${customer.username}"></strong></p>
+
+<div class="chat-box">
+<div class="chat-room-head">
+<div class="chat-room-title">Phong chat khach hang</div>
+<div class="chat-room-subtitle">Moi tin nhan duoc cap nhat tu dong.</div>
+</div>
+<div id="chat-messages" class="chat-messages">
+<div th:each="message : ${messages}" class="chat-message"
+     th:classappend="${message.sender.id != customer.id} ? ' me' : ''">
+    <div class="chat-meta">
+        <span th:text="${message.sender.username}"></span>
+        <span> - </span>
+        <span th:text="${#temporals.format(message.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+    </div>
+    <div th:text="${message.content}"></div>
+</div>
+</div>
+<form class="chat-input" th:action="@{/chat/{id}/send(id=${customer.id})}" method="post">
+    <input name="content" type="text" placeholder="Nhap tin nhan..." required>
+    <button type="submit">Gui</button>
+</form>
+</div>
+<br>
+<a class="btn btn-outline btn-small" th:href="@{/chat}">Quay lai danh sach</a>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+<script th:inline="javascript">
+(function() {
+    const box = document.getElementById("chat-messages");
+    const input = document.querySelector(".chat-input input[name='content']");
+    const customerId = "" + /*[[${customer.id}]]*/ "";
+
+    function formatDate(iso) {
+        if (!iso) {
+            return "";
+        }
+        return new Date(iso).toLocaleString("vi-VN", {
+            hour12: false
+        });
+    }
+
+    function render(messages) {
+        if (!box) {
+            return;
+        }
+        const shouldStickToBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
+        box.innerHTML = "";
+        messages.forEach((message) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "chat-message" + (message.fromMe ? " me" : "");
+            const meta = document.createElement("div");
+            meta.className = "chat-meta";
+            meta.textContent = message.senderName + " - " + formatDate(message.createdAt);
+            const content = document.createElement("div");
+            content.textContent = message.content;
+            wrapper.appendChild(meta);
+            wrapper.appendChild(content);
+            box.appendChild(wrapper);
+        });
+        if (shouldStickToBottom) {
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+
+    function poll() {
+        fetch("/chat/" + customerId + "/messages")
+            .then((response) => response.json())
+            .then((data) => render(data))
+            .catch(() => {});
+    }
+
+    poll();
+    setInterval(poll, 5000);
+
+    if (input) {
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                const form = input.closest("form");
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+    }
+})();
+</script>
+</body>
+</html>

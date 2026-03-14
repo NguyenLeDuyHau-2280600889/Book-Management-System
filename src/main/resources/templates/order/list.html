@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch sử mua hàng</title>
+<th:block th:replace="~{layout::app-css}"></th:block>
+</head>
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+<div class="page">
+<div class="panel order-shell">
+<div class="order-head">
+<div>
+<h1>Lịch sử mua hàng</h1>
+<p class="subtitle">Theo dõi trạng thái và chi tiết các đơn hàng.</p>
+</div>
+<div class="order-head-stat" th:if="${!#lists.isEmpty(orders)}">
+<span>Tổng đơn</span>
+<strong th:text="${#lists.size(orders)}"></strong>
+</div>
+</div>
+
+<div class="cart-actions" sec:authorize="hasRole('ADMIN')">
+<a class="btn btn-primary" href="/orders/add">Thêm đơn hàng</a>
+</div>
+
+<div th:if="${#lists.isEmpty(orders)}">
+<p>Chưa có đơn hàng nào.</p>
+</div>
+
+<div class="order-table-wrap" th:if="${!#lists.isEmpty(orders)}">
+<table class="table order-table">
+<thead>
+<tr>
+<th>Mã đơn</th>
+<th>Ngày đặt</th>
+<th th:if="${isAdmin}">Khách hàng</th>
+<th>Sản phẩm</th>
+<th>Trạng thái</th>
+<th>Tổng tiền</th>
+<th>Biên lai</th>
+<th th:if="${isAdmin}">Thao tác</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="order : ${orders}">
+<td>
+<span class="order-code">#<span th:text="${order.id}"></span></span>
+</td>
+<td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+<td th:if="${isAdmin}" th:text="${order.user.username}"></td>
+<td>
+<ul class="order-items-list">
+<li th:each="item : ${order.items}">
+<span class="order-item-title" th:text="${item.book.title}"></span>
+<span> x</span>
+<span th:text="${item.quantity}"></span>
+<span class="order-item-price" th:text="${' (' + #numbers.formatDecimal(item.price, 1, 'COMMA', 0, 'POINT') + ' đ)'}"></span>
+</li>
+</ul>
+</td>
+<td>
+<div th:if="${isAdmin}">
+<form class="order-status-form" th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
+<select name="status">
+<option value="PENDING" th:selected="${order.status == null || order.status == 'PENDING'}">Chờ duyệt</option>
+<option value="APPROVED" th:selected="${order.status == 'APPROVED'}">Đã duyệt</option>
+<option value="REJECTED" th:selected="${order.status == 'REJECTED'}">Từ chối</option>
+</select>
+<button class="btn btn-outline btn-small" type="submit">Cập nhật</button>
+</form>
+</div>
+<div th:if="${!isAdmin}">
+<span class="order-status-pill"
+      th:classappend="${order.status == 'APPROVED'} ? ' approved' : (${order.status == 'REJECTED'} ? ' rejected' : ' pending')"
+      th:switch="${order.status}">
+<span th:case="'APPROVED'">Đã duyệt</span>
+<span th:case="'REJECTED'">Từ chối</span>
+<span th:case="*">Chờ duyệt</span>
+</span>
+</div>
+</td>
+<td class="order-total" th:text="${#numbers.formatDecimal(order.total, 1, 'COMMA', 0, 'POINT') + ' đ'}"></td>
+<td>
+<a class="btn btn-outline btn-small" th:if="${order.paymentReceiptImage != null and !#strings.isEmpty(order.paymentReceiptImage)}" th:href="${order.paymentReceiptImage}" target="_blank">Xem ảnh</a>
+<span th:if="${order.paymentReceiptImage == null or #strings.isEmpty(order.paymentReceiptImage)}">Không có</span>
+</td>
+<td th:if="${isAdmin}" class="order-admin-actions">
+<a class="btn btn-outline btn-small" th:href="@{/orders/edit/{id}(id=${order.id})}">Sửa</a>
+<form th:action="@{/orders/delete/{id}(id=${order.id})}" method="post">
+<button class="btn btn-danger btn-small" type="submit" onclick="return confirm('Bạn có chắc muốn xóa đơn này?')">Xóa</button>
+</form>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<th:block th:replace="~{layout::footer}"></th:block>
+</body>
+</html>
